@@ -1,70 +1,73 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Compact Day Counter</title>
-    <!-- 等寬字體 -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-    <style>
-   body {
-        display: flex;
-        justify-content: center;   // 水平置中 
-        align-items: flex-start;   // 靠上 
-        height: 100vh;
-        margin: 0;
-        padding-top: 20px;         // 與上方保留距離 
-        background: transparent;
-        font-family: 'Roboto Mono', monospace;
-      }
-      
+<head>
+  <meta charset="UTF-8">
+  <title>Compact Day Counter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    /* CSS 變數：集中管理顏色 */
+    :root { --text-light: #555; --text-dark: #f0f0f0; }
 
-      #counter {
-        font-size: 20px; 
-        font-weight: 500;
-        text-align: center;
-        transition: all 0.3s ease;
-      }
+    body {
+      margin: 0;
+      height: 60vh;
+      display: flex;
+      justify-content: center;
+      padding-top: 20px;       
+      background: transparent;
+      font-family: 'Roboto Mono', monospace;
+    }
 
-      /* 淺色模式：較淺的灰色 */
-      @media (prefers-color-scheme: light) {
-        #counter {
-          color: #555555;
-        }
-      }
+    #counter {
+      font-size: 20px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+      /* 預設淺色模式 */
+      color: var(--text-light);
+    }
 
-      /* 深色模式：銀白 */
-      @media (prefers-color-scheme: dark) {
-        #counter {
-          color: #f0f0f0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="counter"></div>
-    <script>
-      const start = new Date("2024-12-03T00:00:00"); // 開始日期
+    /* 深色模式 */
+    @media (prefers-color-scheme: dark) {
+      #counter { color: var(--text-dark); }
+    }
+  </style>
+</head>
+<body>
 
-      function updateCounter() {
-        const now = new Date();
-        let diff = now - start;
+  <div id="counter"></div>
 
-        // 包含開始日
-        diff += 1000 * 60 * 60 * 24;
+  <script>
+    const START_DATE = new Date("2024-12-03T00:00:00");
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
+    // 定義時間單位常數 (毫秒)
+    const SEC = 1000;
+    const MIN = SEC * 60;
+    const HOUR = MIN * 60;
+    const DAY  = HOUR * 24;
 
-        // 固定寬度顯示，避免抖動
-        const pad = n => n.toString().padStart(2, '0');
+    // 通用補零函式：數字轉字串 -> 前面補0
+    const pad = (num, len = 2) => String(num).padStart(len, '0');
 
-        document.getElementById("counter").innerText =
-          `${days.toString().padStart(3,'0')} D : ${pad(hours)} H : ${pad(minutes)} M : ${pad(seconds)} S`;
-      }
+    function update() {
+      const now = new Date();
+      // 計算差值 + 補償一天 (原本邏輯)
+      const diff = (now - START_DATE) + DAY;
 
-      setInterval(updateCounter, 1000);
-      updateCounter();
-    </script>
-  </body>
+      // 利用常數進行換算
+      const d = Math.floor(diff / DAY);
+      const h = Math.floor((diff % DAY) / HOUR);
+      const m = Math.floor((diff % HOUR) / MIN);
+      const s = Math.floor((diff % MIN) / SEC);
+
+      // 更新畫面
+      document.getElementById("counter").innerText = 
+        `${pad(d, 3)} D : ${pad(h)} H : ${pad(m)} M : ${pad(s)} S`;
+    }
+
+    // 啟動計時
+    setInterval(update, 1000);
+    update();
+  </script>
+
+</body>
 </html>
